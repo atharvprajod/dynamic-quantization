@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# eval.py
-
 import time
 import torch
 
@@ -33,12 +30,9 @@ def measure_tokens_per_second(model, tokenizer, prompts, device='cuda'):
     with torch.no_grad():
         for prompt in prompts:
             inputs = tokenizer(prompt, return_tensors='pt').to(device)
-            # measure how many tokens in prompt
+            # Count number of tokens
             input_ids = inputs['input_ids']
-            token_count = input_ids.numel()
-            total_tokens += token_count
-
-            # Forward pass (dummy)
+            total_tokens += input_ids.numel()
             _ = model(input_ids)
 
     elapsed = time.time() - start_time
@@ -59,14 +53,15 @@ def evaluate_accuracy(model, eval_dataset, device='cuda'):
 
     with torch.no_grad():
         for batch in eval_dataset:
-            # Example: Suppose batch = (input_ids, labels)
+            # Assume batch = (input_ids, labels)
             input_ids, labels = batch
             input_ids = input_ids.to(device)
             labels = labels.to(device)
 
             outputs = model(input_ids)
-            # "outputs" could be logits, we pick the argmax
-            preds = outputs.argmax(dim=-1)
+            # Extract logits from the output and then compute argmax
+            logits = outputs.logits
+            preds = logits.argmax(dim=-1)
             correct += (preds == labels).sum().item()
             total += labels.numel()
 
